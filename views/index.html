@@ -1,9 +1,5 @@
-{{define "Index"}}
-
-{{template "_head"}}
-
-{{template "_menu"}}
-
+{{template "partials/header" .}}
+{{template "partials/menu" .}}
 <body>
     <div class="container">
         <section class="card">
@@ -46,6 +42,4 @@
         }
     }
 </script>
- 
-</html>
-{{end}}
+{{template "partials/footer" .}}

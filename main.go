@@ -1,15 +1,67 @@
 package main
 
 import (
-	"fmt"
+	"log"
 	"net/http"
 
-	"github.com/LouisMatos/web_ponto_go/routes"
+	"github.com/LouisMatos/web_ponto_go/models"
+	"github.com/gofiber/fiber/v2"
+
+	"github.com/gofiber/template/html"
 )
 
 func main() {
-	fmt.Println("Run!!!!")
-	routes.CarregaRotas()
-	fmt.Println("Run!!!!")
-	http.ListenAndServe(":8000", nil)
+
+	engine := html.NewFileSystem(http.Dir("./views"), ".html")
+
+	engine.Reload(true)
+
+	engine.Debug(false)
+
+	engine.Layout("embed")
+
+	engine.Delims("{{", "}}")
+
+	engine.AddFunc("greet", func(name string) string {
+		return "Hello, " + name + "!"
+	})
+
+	app := fiber.New(fiber.Config{
+		Views: engine,
+	})
+
+	app.Static("/static", "./views/resources/")
+
+	app.Get("/", func(c *fiber.Ctx) error {
+		todosOsProdutos := models.BuscaTodosOsProdutos()
+		return c.Render("index", todosOsProdutos)
+	})
+
+	app.Get("/layout", func(c *fiber.Ctx) error {
+		return c.Render("index", fiber.Map{
+			"Title": "Hello, World!",
+		}, "layouts/main")
+	})
+
+	app.Get("/login", func(c *fiber.Ctx) error {
+		return c.Render("index", fiber.Map{
+			"Title": "Hello, World!",
+		}, "login/login")
+	})
+
+	app.Get("/delete", func(c *fiber.Ctx) error {
+		models.DeletaProduto(c.Query("id"))
+		return c.Redirect("/")
+	})
+
+	app.Get("/new", func(c *fiber.Ctx) error {
+		return c.Render("new", nil)
+	})
+
+	app.Post("/insert", func(c *fiber.Ctx) error {
+		//models.Inser(c)
+		return c.Redirect("/")
+	})
+
+	log.Fatal(app.Listen(":3000"))
 }
