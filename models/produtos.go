@@ -1,6 +1,8 @@
 package models
 
-import "github.com/LouisMatos/web_ponto_go/db"
+import (
+	"github.com/LouisMatos/web_ponto_go/db"
+)
 
 type Produto struct {
 	Id         int

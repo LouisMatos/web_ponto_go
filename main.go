@@ -59,7 +59,30 @@ func main() {
 	})
 
 	app.Post("/insert", func(c *fiber.Ctx) error {
-		//models.Inser(c)
+
+		p := new(models.Produto)
+		if err := c.BodyParser(p); err != nil {
+			return err
+		}
+
+		models.CriaNovoProduto(p.Nome, p.Descricao, p.Preco, p.Quantidade)
+		return c.Redirect("/")
+	})
+
+	app.Get("/edit", func(c *fiber.Ctx) error {
+		editProduto := models.EditaProduto((c.Query("id")))
+
+		return c.Render("edit", editProduto)
+	})
+
+	app.Post("/update", func(c *fiber.Ctx) error {
+
+		p := new(models.Produto)
+		if err := c.BodyParser(p); err != nil {
+			return err
+		}
+
+		models.AtualizaProduto(p.Id, p.Nome, p.Descricao, p.Preco, p.Quantidade)
 		return c.Redirect("/")
 	})
 
