@@ -1,0 +1,61 @@
+version: '3'
+services:
+  postgres:
+    image: "postgres"
+    environment:
+      - POSTGRES_USER=root
+      - POSTGRES_PASSWORD=root
+      - POSTGRES_DB=challenge      
+    ports:
+      - "5432:5432"
+    networks:
+      - network_postgres
+    volumes:
+      - postgres:/var/lib/postgresql/data  
+    deploy:
+      resources:
+        limits:
+          cpus: '1'
+          memory: 256M
+
+  pgadmin-compose:
+    image: dpage/pgadmin4
+    environment:
+      PGADMIN_DEFAULT_EMAIL: "luis@teste.com"
+      PGADMIN_DEFAULT_PASSWORD: "123456"
+    ports:
+      - "54321:80"
+    networks:
+      - network_postgres
+    depends_on:
+      - postgres
+    deploy:
+      resources:
+        limits:
+          cpus: '0.2'
+          memory: 128M
+
+  api:
+    build:
+      context: ./
+      dockerfile: Dockerfile
+    image: testeluismatos/web_ponto_go:0.0.1
+    container_name: api
+    ports:
+      - 8070:8070
+    networks:
+      - network_postgres
+    depends_on:
+      - postgres
+    deploy:
+      resources:
+        limits:
+          cpus: '0.5'
+          memory: 128M
+
+volumes:
+  postgres:
+
+networks:
+  network_postgres:
+    driver: bridge

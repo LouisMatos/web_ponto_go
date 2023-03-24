@@ -6,13 +6,13 @@ import (
 	"net/http"
 	"strconv"
 
-	"github.com/LouisMatos/web_ponto_go/models"
+	"github.com/LouisMatos/web_ponto_go/service"
 )
 
 var temp = template.Must(template.ParseGlob("templates/*.html"))
 
 func Index(w http.ResponseWriter, r *http.Request) {
-	todosOsProdutos := models.BuscaTodosOsProdutos()
+	todosOsProdutos := service.BuscaTodosOsProdutos()
 	temp.ExecuteTemplate(w, "Index", todosOsProdutos)
 }
 
@@ -37,20 +37,20 @@ func Insert(w http.ResponseWriter, r *http.Request) {
 			log.Println("Erro na conversão do quantidade:", err)
 		}
 
-		models.CriaNovoProduto(nome, descricao, precoConvertidoParaFloat, quantidadeConvertidaParaInt)
+		service.CriaNovoProduto(nome, descricao, precoConvertidoParaFloat, quantidadeConvertidaParaInt)
 	}
 	http.Redirect(w, r, "/", 301)
 }
 
 func Delete(w http.ResponseWriter, r *http.Request) {
 	idDoProduto := r.URL.Query().Get("id")
-	models.DeletaProduto(idDoProduto)
+	service.DeletaProduto(idDoProduto)
 	http.Redirect(w, r, "/", 301)
 }
 
 func Edit(w http.ResponseWriter, r *http.Request) {
 	idDoProduto := r.URL.Query().Get("id")
-	produto := models.EditaProduto(idDoProduto)
+	produto := service.EditaProduto(idDoProduto)
 	temp.ExecuteTemplate(w, "Edit", produto)
 }
 
@@ -62,7 +62,7 @@ func Update(w http.ResponseWriter, r *http.Request) {
 		preco := r.FormValue("preco")
 		quantidade := r.FormValue("quantidade")
 
-		idConvertidaParaInt, err := strconv.Atoi(id)
+		idConvertidaParaInt, err := strconv.ParseUint(id, 10, 64)
 		if err != nil {
 			log.Println("Erro na convesão do ID para int:", err)
 		}
@@ -77,7 +77,7 @@ func Update(w http.ResponseWriter, r *http.Request) {
 			log.Println("Erro na convesão da quantidade para int:", err)
 		}
 
-		models.AtualizaProduto(idConvertidaParaInt, nome, descricao, precoConvertidoParaFloat, quantidadeConvertidaParaInt)
+		service.AtualizaProduto(uint(idConvertidaParaInt), nome, descricao, precoConvertidoParaFloat, quantidadeConvertidaParaInt)
 	}
 	http.Redirect(w, r, "/", 301)
 }

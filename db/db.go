@@ -1,16 +1,35 @@
 package db
 
 import (
-	"database/sql"
+	"log"
+	"time"
 
-	_ "github.com/lib/pq"
+	"github.com/LouisMatos/web_ponto_go/models"
+	"gorm.io/driver/postgres"
+	"gorm.io/gorm"
 )
 
-func ConectaComBancoDeDados() *sql.DB {
-	conexao := "user=root dbname=challenge password=root host=localhost port=5432 sslmode=disable"
-	db, err := sql.Open("postgres", conexao)
+var (
+	DB  *gorm.DB
+	err error
+)
+
+func ConexaoComBancoDados(connectionString string) {
+
+	DB, err = gorm.Open(postgres.Open(connectionString), &gorm.Config{})
 	if err != nil {
-		panic(err.Error())
+		log.Panic("Erro ao conectar com banco de dados!")
+	} else {
+		dbConfig, _ := DB.DB()
+		dbConfig.SetMaxOpenConns(25)
+		dbConfig.SetMaxIdleConns(25)
+		dbConfig.SetConnMaxLifetime(5 * time.Minute)
 	}
-	return db
+	log.Println("Conexão ao banco de dados realizado com sucesso!")
+
+}
+
+func Migrate() {
+	DB.AutoMigrate(&models.Produto{})
+	log.Println("Migração do banco de dados concluída...")
 }

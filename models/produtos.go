@@ -1,111 +1,27 @@
 package models
 
 import (
-	"github.com/LouisMatos/web_ponto_go/db"
+	"gopkg.in/validator.v2"
 )
 
 type Produto struct {
-	Id         int
-	Nome       string
-	Descricao  string
-	Preco      float64
-	Quantidade int
+	Id         uint    `gorm:"primary_key" json:"id"`
+	Nome       string  `gorm:"not null" json:"nome"`
+	Descricao  string  `gorm:"not null" json:"descricao"`
+	Preco      float64 `gorm:"not null" json:"preco"`
+	Quantidade int     `gorm:"not null" json:"quantidade"`
 }
 
-func BuscaTodosOsProdutos() []Produto {
-	db := db.ConectaComBancoDeDados()
-
-	selectDeTodosOsProdutos, err := db.Query("select * from produtos")
-	if err != nil {
-		panic(err.Error())
-	}
-
-	p := Produto{}
-	produtos := []Produto{}
-
-	for selectDeTodosOsProdutos.Next() {
-		var id, quantidade int
-		var nome, descricao string
-		var preco float64
-
-		err = selectDeTodosOsProdutos.Scan(&id, &nome, &descricao, &preco, &quantidade)
-		if err != nil {
-			panic(err.Error())
-		}
-
-		p.Id = id
-		p.Nome = nome
-		p.Descricao = descricao
-		p.Preco = preco
-		p.Quantidade = quantidade
-
-		produtos = append(produtos, p)
-	}
-	defer db.Close()
-	return produtos
-}
-func CriaNovoProduto(nome, descricao string, preco float64, quantidade int) {
-	db := db.ConectaComBancoDeDados()
-
-	insereDadosNoBanco, err := db.Prepare("insert into produtos(nome, descricao, preco, quantidade) values($1, $2, $3, $4)")
-	if err != nil {
-		panic(err.Error())
-	}
-
-	insereDadosNoBanco.Exec(nome, descricao, preco, quantidade)
-	defer db.Close()
-
+type ProdutoDTO struct {
+	Descricao string `json:"descricao" validate:"nonzero, nonnil"`
+	Valor     string `json:"valor" validate:"nonzero, min=4, nonnil, regexp=^[\\d]+[.][\\d]{2}$"`
+	Data      string `json:"data" validate:"nonzero, min=10, nonnil, regexp=^([0]?[1-9]|[1|2][0-9]|[3][0|1])[./-]([0]?[1-9]|[1][0-2])[./-]([0-9]{4}|[0-9]{2})$"`
+	Categoria string `json:"categoria"`
 }
 
-func DeletaProduto(id string) {
-	db := db.ConectaComBancoDeDados()
-
-	deletarOProduto, err := db.Prepare("delete from produtos where id=$1")
-	if err != nil {
-		panic(err.Error())
+func ValidaDadosProduto(produto *ProdutoDTO) error {
+	if err := validator.Validate(produto); err != nil {
+		return err
 	}
-
-	deletarOProduto.Exec(id)
-	defer db.Close()
-
-}
-
-func EditaProduto(id string) Produto {
-	db := db.ConectaComBancoDeDados()
-
-	produtoDoBanco, err := db.Query("select * from produtos where id=$1", id)
-	if err != nil {
-		panic(err.Error())
-	}
-
-	produtoParaAtualizar := Produto{}
-
-	for produtoDoBanco.Next() {
-		var id, quantidade int
-		var nome, descricao string
-		var preco float64
-
-		err = produtoDoBanco.Scan(&id, &nome, &descricao, &preco, &quantidade)
-		if err != nil {
-			panic(err.Error())
-		}
-		produtoParaAtualizar.Id = id
-		produtoParaAtualizar.Nome = nome
-		produtoParaAtualizar.Descricao = descricao
-		produtoParaAtualizar.Preco = preco
-		produtoParaAtualizar.Quantidade = quantidade
-	}
-	defer db.Close()
-	return produtoParaAtualizar
-}
-
-func AtualizaProduto(id int, nome, descricao string, preco float64, quantidade int) {
-	db := db.ConectaComBancoDeDados()
-
-	AtualizaProduto, err := db.Prepare("update produtos set nome=$1, descricao=$2, preco=$3, quantidade=$4 where id=$5")
-	if err != nil {
-		panic(err.Error())
-	}
-	AtualizaProduto.Exec(nome, descricao, preco, quantidade, id)
-	defer db.Close()
+	return nil
 }
