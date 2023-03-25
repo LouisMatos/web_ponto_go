@@ -9,8 +9,12 @@ import (
 func CarregaRotas(app *fiber.App) {
 
 	app.Get("/", func(c *fiber.Ctx) error {
+		return c.Render("index", nil)
+	})
+
+	app.Get("/index-old", func(c *fiber.Ctx) error {
 		todosOsProdutos := service.BuscaTodosOsProdutos()
-		return c.Render("index", todosOsProdutos)
+		return c.Render("index-old", todosOsProdutos)
 	})
 
 	app.Get("/layout", func(c *fiber.Ctx) error {
@@ -61,4 +65,10 @@ func CarregaRotas(app *fiber.App) {
 		service.AtualizaProduto(p.Id, p.Nome, p.Descricao, p.Preco, p.Quantidade)
 		return c.Redirect("/")
 	})
+
+	// a custom 404 handler at router tail
+	//app.ErrorHandler(func(c *fiber.Ctx) error {
+	//	c.Status(404).Redirect("")
+	//	return nil
+	//})
 }

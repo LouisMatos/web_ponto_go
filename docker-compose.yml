@@ -42,7 +42,7 @@ services:
     image: testeluismatos/web_ponto_go:0.0.1
     container_name: api
     ports:
-      - 8070:8070
+      - 8070:3000
     networks:
       - network_postgres
     depends_on:

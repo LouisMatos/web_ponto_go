@@ -3,6 +3,7 @@ package server
 import (
 	"log"
 	"net/http"
+	"time"
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/template/html"
@@ -25,10 +26,27 @@ func StartNewServer() *fiber.App {
 	})
 
 	app := fiber.New(fiber.Config{
-		Views: engine,
+		Prefork:       true,
+		StrictRouting: true,
+		ServerHeader:  "Fiber",
+		AppName:       "Web Ponto Eletronico App - v1.0.0",
+		Views:         engine,
 	})
 
-	app.Static("/static", "./views/resources/")
+	//app := fiber.New(fiber.Config{
+	//	Views: engine,
+	//})
+
+	config := fiber.Static{
+		Compress:      true,
+		ByteRange:     true,
+		Browse:        true,
+		Index:         "index.html",
+		CacheDuration: 60 * time.Second,
+		MaxAge:        3600,
+		Next:          nil,
+	}
+	app.Static("/static", "./views/resources/", config)
 
 	return app
 }
