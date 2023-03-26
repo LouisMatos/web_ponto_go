@@ -52,7 +52,7 @@ func CarregaRotas(app *fiber.App) {
 	app.Get("/edit", func(c *fiber.Ctx) error {
 		editProduto := service.EditaProduto((c.Query("id")))
 
-		return c.Render("edit", editProduto)
+		return c.Render("edit", editProduto, "layouts/main")
 	})
 
 	app.Post("/update", func(c *fiber.Ctx) error {
