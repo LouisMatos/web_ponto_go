@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"github.com/gofiber/fiber/v2"
+	"github.com/gofiber/fiber/v2/middleware/basicauth"
 	"github.com/gofiber/template/html"
 )
 
@@ -13,7 +14,7 @@ func StartNewServer() *fiber.App {
 
 	engine := html.NewFileSystem(http.Dir("./views"), ".html")
 
-	engine.Reload(true)
+	engine.Reload(false)
 
 	engine.Debug(false)
 
@@ -21,21 +22,37 @@ func StartNewServer() *fiber.App {
 
 	engine.Delims("{{", "}}")
 
-	engine.AddFunc("greet", func(name string) string {
-		return "Hello, " + name + "!"
-	})
-
 	app := fiber.New(fiber.Config{
-		Prefork:       true,
-		StrictRouting: true,
-		ServerHeader:  "Fiber",
-		AppName:       "Web Ponto Eletronico App - v1.0.0",
-		Views:         engine,
+		Prefork:           false,
+		StrictRouting:     true,
+		ServerHeader:      "Fiber",
+		AppName:           "Web Ponto Eletronico App - v1.0.0",
+		Views:             engine,
+		ReduceMemoryUsage: false,
 	})
 
-	//app := fiber.New(fiber.Config{
-	//	Views: engine,
-	//})
+	// Or extend your config for customization
+	app.Use(basicauth.New(basicauth.Config{
+		Users: map[string]string{
+			"john":  "doe",
+			"admin": "123456",
+		},
+		Realm: "Forbidden",
+		Authorizer: func(user, pass string) bool {
+			if user == "john" && pass == "doe" {
+				return true
+			}
+			if user == "admin" && pass == "123456" {
+				return true
+			}
+			return false
+		},
+		Unauthorized: func(c *fiber.Ctx) error {
+			return c.Render("reload", nil, "layouts/main")
+		},
+		ContextUsername: "_user",
+		ContextPassword: "_pass",
+	}))
 
 	config := fiber.Static{
 		Compress:      true,
