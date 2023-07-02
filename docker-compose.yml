@@ -40,7 +40,7 @@ services:
       context: ./
       dockerfile: Dockerfile
     image: testeluismatos/web_ponto_go:0.0.1
-    container_name: api
+    container_name: api_001
     ports:
       - 8070:3000
     networks:

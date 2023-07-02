@@ -6,24 +6,24 @@
 
 #div1 {
   /*background-color: red;*/
-  transform: translateY(50%);
+  transform: translateY(33%);
 }
 
 #time {
   font-family: 'Nova Mono', monospace;
-  font-size: 18vw;
-  text-align: center;
+  font-size: 5vw;
+  text-align: left;
   text-shadow: 0px 0px 20px;
 }
 
 #date {
   font-family: 'Eczar', serif;
-  font-size: 10vmin;
-  text-align: center;
+  font-size: 5vmin;
+  text-align: left;
   text-shadow: 0px 0px 20px blue;
 }
 
- @media only screen and (max-width: 300px){
-  #time {font-size: 2em;}
+ @media only screen and (max-width: 50px){
+  #time {font-size: 1em;}
   #date {font-size: 1em;}
 }
